@@ -8,29 +8,167 @@
   </head>
   <body>
     <header>
+<<<<<<< HEAD
       <h1>Project title: Neurodevelopmental Disorders in children aged 4-9 across Kenya</h1>
       <p class="problem-statement">Young children aged 4-9 with Neurodevelopmental Disorders (NDDs') across Kenya who are undiagnosed due to lack of parental/teacher knowledge on the condition and affordable psychiatric care.</p>
+=======
+      <h1>Neurodevelopmental Disorders in Children — Kenya Referral Tool</h1>
+      <p class="problem-statement">
+        Young children with Neurodevelopmental Disorders (NDDs) who live in rural and underserved
+        areas are often undiagnosed due to limited parental and teacher awareness, and lack of
+        affordable psychiatric care. This tool helps parents aged 3–16 screen for possible conditions
+        and find local support.
+      </p>
+>>>>>>> 430916c (Added new code to index.html, script.js and styles.css)
     </header>
+
     <main>
-      <section id="Jama Network: Open-Burden of Neurodevelopmental Disorders in Kenyan Children">
-        <h2>Jama Network: Open-Burden of Neurodevelopmental Disorders in Kenyan Children</h2>
-        <p>522 of 11,223 of children aged 6-9 were diagnosed with a Neurodevelopmental Disorder, yet they have not received clinical help or support.</p>
+      <section class="research-section">
+        <h2>JAMA Network Open — Burden of NDDs in Kenyan Children</h2>
+        <p>
+          522 of 11,223 children aged 6–9 were diagnosed with a Neurodevelopmental Disorder, yet
+          they had not received clinical help or support.
+        </p>
       </section>
-      <section id="Input elements:  For parents to input the child’s symptoms, age, region and gender. 
 
-Button element: Submitting the child’s information and a pop up screen appears of the child’s probable condition
+      <section class="tool-section">
+        <h2>The Tool</h2>
+        <p class="tool-intro">
+          Enter your child's symptoms, age, gender, and county to receive a <em>probable</em>
+          condition (not a medical diagnosis) and a list of nearby hospitals, clinics, and programs.
+        </p>
 
-Div or section element: When the submit button is clicked but the pop up presents a sentence saying “Not Clear Enough”, a questionnaire is provided
+        <form id="screening-form">
+          <div class="form-group">
+            <label for="symptoms">What symptoms does your child display?</label>
+            <textarea
+              id="symptoms"
+              name="symptoms"
+              rows="4"
+              placeholder="e.g. difficulty paying attention, speech delay, trouble making friends..."
+              required
+            ></textarea>
+          </div>
 
-Div or section element: After the questionnaire is completed and the parent submits it after completed, the diagnosis is presented.">
-        <h2>The tool</h2>
-        <p>Type in your child's symptoms, age, gender and county in kenya to get a diagnosis.</p>
-         <p> <input>What symptoms does your child display?</input></p>
-          <input>How old is your child currently?</input>
-          <p><input>What gender is your child?</input></p>
-          <p><input>What county does the child reside in?</input></p>
+          <div class="form-group">
+            <label for="age">How old is your child currently?</label>
+            <input
+              id="age"
+              name="age"
+              type="number"
+              min="3"
+              max="16"
+              placeholder="Age (3–16)"
+              required
+            >
+          </div>
+
+          <div class="form-group">
+            <label for="gender">What gender is your child?</label>
+            <select id="gender" name="gender" required>
+              <option value="">— Select gender —</option>
+              <option value="female">Female</option>
+              <option value="male">Male</option>
+              <option value="prefer not to say">Prefer not to say</option>
+              <option value="custom">Custom</option>
+            </select>
+          </div>
+
+          <div class="form-group hidden" id="custom-gender-group">
+            <label for="custom-gender">Please specify</label>
+            <input
+              id="custom-gender"
+              name="customGender"
+              type="text"
+              placeholder="Enter gender identity"
+            >
+          </div>
+
+          <div class="form-group">
+            <label for="county">What county does the child reside in?</label>
+            <select id="county" name="county" required>
+              <option value="">— Select county —</option>
+              <option value="Mombasa">Mombasa</option>
+              <option value="Kwale">Kwale</option>
+              <option value="Kilifi">Kilifi</option>
+              <option value="Tana River">Tana River</option>
+              <option value="Lamu">Lamu</option>
+              <option value="Taita-Taveta">Taita-Taveta</option>
+              <option value="Garissa">Garissa</option>
+              <option value="Wajir">Wajir</option>
+              <option value="Mandera">Mandera</option>
+              <option value="Marsabit">Marsabit</option>
+              <option value="Isiolo">Isiolo</option>
+              <option value="Meru">Meru</option>
+              <option value="Tharaka-Nithi">Tharaka-Nithi</option>
+              <option value="Embu">Embu</option>
+              <option value="Kitui">Kitui</option>
+              <option value="Machakos">Machakos</option>
+              <option value="Makueni">Makueni</option>
+              <option value="Nyandarua">Nyandarua</option>
+              <option value="Nyeri">Nyeri</option>
+              <option value="Kirinyaga">Kirinyaga</option>
+              <option value="Murang'a">Murang'a</option>
+              <option value="Kiambu">Kiambu</option>
+              <option value="Turkana">Turkana</option>
+              <option value="West Pokot">West Pokot</option>
+              <option value="Samburu">Samburu</option>
+              <option value="Trans Nzoia">Trans Nzoia</option>
+              <option value="Uasin Gishu">Uasin Gishu</option>
+              <option value="Elgeyo-Marakwet">Elgeyo-Marakwet</option>
+              <option value="Nandi">Nandi</option>
+              <option value="Baringo">Baringo</option>
+              <option value="Laikipia">Laikipia</option>
+              <option value="Nakuru">Nakuru</option>
+              <option value="Narok">Narok</option>
+              <option value="Kajiado">Kajiado</option>
+              <option value="Kericho">Kericho</option>
+              <option value="Bomet">Bomet</option>
+              <option value="Kakamega">Kakamega</option>
+              <option value="Vihiga">Vihiga</option>
+              <option value="Bungoma">Bungoma</option>
+              <option value="Busia">Busia</option>
+              <option value="Siaya">Siaya</option>
+              <option value="Kisumu">Kisumu</option>
+              <option value="Homa Bay">Homa Bay</option>
+              <option value="Migori">Migori</option>
+              <option value="Kisii">Kisii</option>
+              <option value="Nyamira">Nyamira</option>
+              <option value="Nairobi">Nairobi</option>
+            </select>
+          </div>
+
           <button type="submit">Submit Information</button>
+<<<<<<< HEAD
+=======
+        </form>
+      </section>
+
+      <section id="results" class="results-section hidden">
+        <h2>Screening Results</h2>
+        <p class="disclaimer">
+          <strong>Important:</strong> This tool does not provide a medical diagnosis. Always consult
+          a qualified healthcare provider for a full assessment.
+        </p>
+
+        <div class="result-card">
+          <h3>Probable Condition</h3>
+          <p id="condition-result" class="condition-name"></p>
+          <p id="condition-explanation" class="condition-detail"></p>
+          <h4>How to Support Your Child</h4>
+          <p id="condition-advice" class="condition-detail"></p>
+        </div>
+
+        <div class="result-card">
+          <h3 id="resources-heading">Resources in Your County</h3>
+          <ul id="facility-list"></ul>
+        </div>
+
+        <button type="button" id="start-over">Start Over</button>
+>>>>>>> 430916c (Added new code to index.html, script.js and styles.css)
       </section>
     </main>
+
+    <script src="script.js"></script>
   </body>
 </html>
