@@ -15,3 +15,12 @@ Tool: Cursor
 Prompt:	["I have an HTML button with id 'findStrategy' and an output div with id 'strategyOutput'. I also have a text input with id 'feeling'. Write a JavaScript function that reads what the user typed and displays a different coping strategy depending on whether they typed 'anxious', 'tired', or 'overwhelmed'. If they type something else, display a default strategy. Add comments to every line explaining what it does."]
 Decision:	Accepted 
 Reason:	[Everything was correct from what I prompted]
+
+# AI Interaction Log
+
+## Day 6
+
+Day:	6
+Prompt:	["My prototype does [it's a referral website where parent with young children in kenya who believe theyre child might have an NDD]. I already have [a static feature and boxes to input the child's age, gender, symptoms and county of residence]. I want to add [input elements that lead to a page where a probable condition is given and a list of hospitals, clinic and programs are presented according to the county]. What is the minimum change needed?"]
+Decision: Accepted 
+Reason:	[The code had the skeleton of all the code I needed for the page]
