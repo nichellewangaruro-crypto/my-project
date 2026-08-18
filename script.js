@@ -7,8 +7,41 @@ const startOverBtn = document.getElementById("start-over");
 const symptomsInput = document.getElementById("symptoms");
 const symptomsError = document.getElementById("symptoms-error");
 
-const LETTERS_ONLY_PATTERN = /^[a-zA-Z\s]+$/;
-const MIN_KEYWORD_MATCHES = 2;
+const MIN_KEYWORD_MATCHES = 1;
+const MAX_RESOURCE_DISTANCE_KM = 35;
+const MIN_SYMPTOM_WORDS = 2;
+const MIN_SYMPTOM_CHARS = 8;
+
+// Approximate road distances (km) between county centres for nearby pairs.
+const COUNTY_DISTANCES = {
+  "Kiambu|Nairobi": 22,
+  "Kajiado|Nairobi": 32,
+  "Kiambu|Murang'a": 28,
+  "Kirinyaga|Nyeri": 24,
+  "Embu|Meru": 30,
+  "Meru|Tharaka-Nithi": 22,
+  "Kilifi|Mombasa": 58,
+  "Kwale|Mombasa": 28,
+  "Kisumu|Siaya": 28,
+  "Bungoma|Kakamega": 30,
+  "Busia|Bungoma": 35,
+  "Kakamega|Vihiga": 22,
+  "Laikipia|Nyeri": 35,
+  "Baringo|Nakuru": 40,
+  "Narok|Nakuru": 70,
+  "Machakos|Makueni": 35,
+  "Kitui|Machakos": 45,
+  "Elgeyo-Marakwet|Uasin Gishu": 30,
+  "Nandi|Uasin Gishu": 25,
+  "Trans Nzoia|Uasin Gishu": 28,
+  "Bomet|Kericho": 30,
+  "Homa Bay|Migori": 32,
+  "Kisii|Migori": 28,
+  "Kisii|Nyamira": 22,
+  "Garissa|Wajir": 120,
+  "Isiolo|Meru": 55,
+  "Marsabit|Samburu": 90
+};
 
 const conditions = [
   {
@@ -466,18 +499,55 @@ function clearSymptomsError() {
   symptomsInput.removeAttribute("aria-invalid");
 }
 
-function sanitizeSymptomsInput() {
-  const cleaned = symptomsInput.value.replace(/[^a-zA-Z\s]/g, "");
-  if (cleaned !== symptomsInput.value) {
-    symptomsInput.value = cleaned;
-    showSymptomsError("Only letters and spaces are allowed. Numbers and symbols were removed.");
-    return false;
+function getDistanceBetweenCounties(fromCounty, toCounty) {
+  if (fromCounty === toCounty) {
+    return 0;
   }
-  return true;
+  const key = [fromCounty, toCounty].sort().join("|");
+  return COUNTY_DISTANCES[key] ?? Infinity;
 }
 
-function isValidSymptomsText(text) {
-  return text.length > 0 && LETTERS_ONLY_PATTERN.test(text);
+function isGibberish(text) {
+  const normalized = text.trim().toLowerCase();
+  const words = normalized.split(/\s+/).filter((word) => word.length > 0);
+
+  if (normalized.length < MIN_SYMPTOM_CHARS) {
+    return true;
+  }
+
+  if (words.length < MIN_SYMPTOM_WORDS) {
+    return true;
+  }
+
+  const letters = normalized.replace(/[^a-z]/g, "");
+  if (letters.length < MIN_SYMPTOM_CHARS - 2) {
+    return true;
+  }
+
+  const vowels = (letters.match(/[aeiou]/g) || []).length;
+  if (letters.length > 5 && vowels / letters.length < 0.12) {
+    return true;
+  }
+
+  if (/(.)\1{4,}/.test(letters)) {
+    return true;
+  }
+
+  if (words.length >= 3 && new Set(words).size === 1) {
+    return true;
+  }
+
+  const keyboardSpam = ["asdf", "qwer", "zxcv", "hjkl"];
+  if (keyboardSpam.some((pattern) => normalized.includes(pattern))) {
+    return true;
+  }
+
+  return false;
+}
+
+function isReadableSymptoms(text) {
+  const trimmed = text.trim();
+  return trimmed.length > 0 && !isGibberish(trimmed);
 }
 
 function matchCondition(symptomsText) {
@@ -502,7 +572,11 @@ function matchCondition(symptomsText) {
     }
   }
 
-  if (!bestMatch || bestScore < MIN_KEYWORD_MATCHES || tied) {
+  if (!bestMatch || bestScore < MIN_KEYWORD_MATCHES) {
+    return { isUnclear: true };
+  }
+
+  if (tied && bestScore === 1) {
     return { isUnclear: true };
   }
 
@@ -510,14 +584,31 @@ function matchCondition(symptomsText) {
 }
 
 function getResourcesForCountyAndCondition(county, conditionId) {
-  const hub = REGION_MAP[county] || "Nairobi";
-  const hubResources = resourcesByHub[hub]?.[conditionId] || [];
-  return hubResources.map((resource) => ({
-    ...resource,
-    travelNote: resource.locationCounty !== county
-      ? `Located in ${resource.locationCounty}; serves families from ${county}.`
-      : `Located in ${county}.`
-  }));
+  const seen = new Set();
+  const allResources = [];
+
+  for (const hubResources of Object.values(resourcesByHub)) {
+    for (const resource of hubResources[conditionId] || []) {
+      if (!seen.has(resource.name)) {
+        seen.add(resource.name);
+        allResources.push(resource);
+      }
+    }
+  }
+
+  return allResources
+    .map((resource) => {
+      const distanceKm = getDistanceBetweenCounties(county, resource.locationCounty);
+      return { ...resource, distanceKm };
+    })
+    .filter((resource) => resource.distanceKm <= MAX_RESOURCE_DISTANCE_KM)
+    .sort((a, b) => a.distanceKm - b.distanceKm)
+    .map((resource) => ({
+      ...resource,
+      travelNote: resource.distanceKm === 0
+        ? `Located in ${county} (within your county).`
+        : `Located in ${resource.locationCounty}, approximately ${resource.distanceKm} km from ${county} (within 35 km).`
+    }));
 }
 
 function renderAdvice(adviceItems) {
@@ -535,8 +626,13 @@ function renderFacilities(county, conditionId) {
   const heading = document.getElementById("resources-heading");
   const items = getResourcesForCountyAndCondition(county, conditionId);
 
-  heading.textContent = `Resources for This Condition in ${county} County`;
+  heading.textContent = `Resources for This Condition Near ${county} County`;
   list.innerHTML = "";
+
+  if (items.length === 0) {
+    list.innerHTML = `<li>No hospitals, clinics, or programmes for this condition were found within 35 km of ${county} County. Please contact your county health office for a local referral.</li>`;
+    return;
+  }
 
   for (const facility of items) {
     const li = document.createElement("li");
@@ -559,20 +655,6 @@ function getGenderValue() {
   return selected;
 }
 
-symptomsInput.addEventListener("input", () => {
-  sanitizeSymptomsInput();
-  if (isValidSymptomsText(symptomsInput.value.trim())) {
-    clearSymptomsError();
-  }
-});
-
-symptomsInput.addEventListener("blur", () => {
-  const text = symptomsInput.value.trim();
-  if (text && !isValidSymptomsText(text)) {
-    showSymptomsError("Symptoms must contain only letters and spaces.");
-  }
-});
-
 genderSelect.addEventListener("change", () => {
   const isCustom = genderSelect.value === "custom";
   customGenderGroup.classList.toggle("hidden", !isCustom);
@@ -591,16 +673,17 @@ form.addEventListener("submit", (event) => {
   const age = Number(formData.get("age"));
   const county = formData.get("county");
 
-  sanitizeSymptomsInput();
-
   if (!symptoms) {
-    showSymptomsError("Please describe your child's symptoms using letters only.");
+    showSymptomsError("Please describe your child's symptoms before submitting.");
     symptomsInput.focus();
     return;
   }
 
-  if (!isValidSymptomsText(symptoms)) {
-    showSymptomsError("Symptoms must contain only letters and spaces. Please remove numbers or symbols.");
+  if (!isReadableSymptoms(symptoms)) {
+    showSymptomsError(
+      "We could not read your symptoms clearly. Please re-type them in plain language with at least a few words " +
+      "(for example: 'my child is very hyperactive and cannot sit still in class' or 'she avoids eye contact and repeats words')."
+    );
     symptomsInput.focus();
     return;
   }
@@ -619,11 +702,10 @@ form.addEventListener("submit", (event) => {
 
   if (result.isUnclear) {
     showSymptomsError(
-      "Your symptoms are not clear enough for us to suggest a probable condition. " +
-      "Please re-type them with more specific details — for example: " +
-      "'hyperactive and cannot focus', 'avoids eye contact and repeats words', " +
-      "'cannot read or spell', 'messy handwriting', 'cannot understand numbers', " +
-      "'learns slowly in all areas', or 'clumsy and poor balance'."
+      "Your symptoms are not clear enough to suggest a probable condition. " +
+      "Please re-type them with more detail about what you have noticed — for example: " +
+      "trouble paying attention, difficulty making friends, reading struggles, messy handwriting, " +
+      "problems with numbers, slow learning in daily tasks, or clumsiness and poor balance."
     );
     symptomsInput.focus();
     return;
