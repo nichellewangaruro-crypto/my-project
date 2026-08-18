@@ -23,4 +23,4 @@ Reason:	[Everything was correct from what I prompted]
 Day:	6
 Prompt:	["My prototype does [it's a referral website where parent with young children in kenya who believe theyre child might have an NDD]. I already have [a static feature and boxes to input the child's age, gender, symptoms and county of residence]. I want to add [input elements that lead to a page where a probable condition is given and a list of hospitals, clinic and programs are presented according to the county]. What is the minimum change needed?"]
 Decision: Accepted 
-Reason:	[The code had the skeleton of all the code I needed for the page]
+Reason:	[I understand the code well and it has no errors]
