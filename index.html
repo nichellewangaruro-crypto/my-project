@@ -10,9 +10,9 @@
     <header>
       <h1>Neurodevelopmental Disorders in Children — Kenya Referral Tool</h1>
       <p class="problem-statement">
-        Young children with Neurodevelopmental Disorders (NDDs) who live in areas that lack the knowledge of NDDs are often undiagnosed due to limited parental and teacher awareness, and lack of
-        affordable psychiatric care. This tool helps parents aged 3–16 screen for possible conditions
-        and find local support.
+        Young children with Neurodevelopmental Disorders (NDDs) across Kenya are often undiagnosed
+        due to limited awareness and lack of affordable care. This tool helps parents of children
+        aged 3–16 screen for possible conditions and find local support.
       </p>
     </header>
 
@@ -32,16 +32,21 @@
           condition (not a medical diagnosis) and a list of nearby hospitals, clinics, and programs.
         </p>
 
-        <form id="screening-form">
+        <form id="screening-form" novalidate>
           <div class="form-group">
             <label for="symptoms">What symptoms does your child display?</label>
             <textarea
               id="symptoms"
               name="symptoms"
               rows="4"
-              placeholder="e.g. difficulty paying attention, speech delay, trouble making friends..."
+              placeholder="e.g. difficulty paying attention, trouble reading, poor handwriting..."
               required
+              aria-describedby="symptoms-hint symptoms-error"
             ></textarea>
+            <p id="symptoms-hint" class="field-hint">
+              Use letters and spaces only. Describe specific behaviours (e.g. hyperactive, avoids eye contact, cannot read).
+            </p>
+            <p id="symptoms-error" class="field-error hidden" role="alert"></p>
           </div>
 
           <div class="form-group">
@@ -133,7 +138,6 @@
           </div>
 
           <button type="submit">Submit Information</button>
-
         </form>
       </section>
 
@@ -149,7 +153,7 @@
           <p id="condition-result" class="condition-name"></p>
           <p id="condition-explanation" class="condition-detail"></p>
           <h4>How to Support Your Child</h4>
-          <p id="condition-advice" class="condition-detail"></p>
+          <ul id="condition-advice" class="condition-detail advice-list"></ul>
         </div>
 
         <div class="result-card">
