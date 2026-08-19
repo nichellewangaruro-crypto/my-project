@@ -35,17 +35,32 @@
         <form id="screening-form" novalidate>
           <div class="form-group">
             <label for="symptoms">What symptoms does your child display?</label>
-            <textarea
+            <select
               id="symptoms"
               name="symptoms"
-              rows="4"
-              placeholder="e.g. difficulty paying attention, trouble reading, poor handwriting..."
+              multiple
               required
               aria-describedby="symptoms-hint symptoms-error"
-            ></textarea>
+            >
+              <option value="attention">Difficulty paying attention</option>
+              <option value="hyperactive">Hyperactivity or cannot sit still</option>
+              <option value="impulsive">Impulsive behaviour</option>
+              <option value="social">Difficulty making friends or eye contact</option>
+              <option value="repetitive">Repetitive behaviours or strong need for routine</option>
+              <option value="sensory">Sensory sensitivity or frequent meltdowns</option>
+              <option value="reading">Difficulty reading or sounding out words</option>
+              <option value="spelling">Spelling difficulties</option>
+              <option value="writing">Messy or slow handwriting</option>
+              <option value="numbers">Difficulty with numbers or counting</option>
+              <option value="milestones">Delayed developmental milestones</option>
+              <option value="life skills">Difficulty with everyday life skills</option>
+              <option value="coordination">Poor coordination or clumsiness</option>
+              <option value="balance">Difficulty with balance</option>
+            </select>
             <p id="symptoms-hint" class="field-hint">
-              Type freely in your own words. Any description is accepted unless it is gibberish or a random mix of letters.
+              Select all symptoms that apply. You can select up to 11 symptoms.
             </p>
+            <p id="symptoms-count" class="field-hint">0 of 11 symptoms selected</p>
             <p id="symptoms-error" class="field-error hidden" role="alert"></p>
           </div>
 

@@ -5,9 +5,11 @@ const customGenderGroup = document.getElementById("custom-gender-group");
 const customGenderInput = document.getElementById("custom-gender");
 const startOverBtn = document.getElementById("start-over");
 const symptomsInput = document.getElementById("symptoms");
+const symptomsCount = document.getElementById("symptoms-count");
 const symptomsError = document.getElementById("symptoms-error");
 
 const MIN_KEYWORD_MATCHES = 1;
+const MAX_SYMPTOMS = 11;
 const MAX_RESOURCE_DISTANCE_KM = 35;
 
 // Approximate road distances (km) between county centres for nearby pairs.
@@ -497,6 +499,30 @@ function clearSymptomsError() {
   symptomsInput.removeAttribute("aria-invalid");
 }
 
+function getSelectedSymptoms() {
+  return Array.from(symptomsInput.selectedOptions).map(
+    (option) => option.value
+  );
+}
+
+symptomsInput.addEventListener("change", () => {
+  const selectedSymptoms = getSelectedSymptoms();
+
+  if (selectedSymptoms.length > MAX_SYMPTOMS) {
+    const lastSelected = symptomsInput.selectedOptions[
+      symptomsInput.selectedOptions.length - 1
+    ];
+
+    lastSelected.selected = false;
+    showSymptomsError("Please select no more than 11 symptoms.");
+  } else {
+    clearSymptomsError();
+  }
+
+  symptomsCount.textContent =
+    `${getSelectedSymptoms().length} of ${MAX_SYMPTOMS} symptoms selected`;
+});
+
 function getDistanceBetweenCounties(fromCounty, toCounty) {
   if (fromCounty === toCounty) {
     return 0;
@@ -624,12 +650,19 @@ form.addEventListener("submit", (event) => {
   clearSymptomsError();
 
   const formData = new FormData(form);
-  const symptoms = formData.get("symptoms").trim();
+  const selectedSymptoms = getSelectedSymptoms();
+  const symptoms = selectedSymptoms.join(", ");
   const age = Number(formData.get("age"));
   const county = formData.get("county");
 
-  if (!symptoms) {
-    showSymptomsError("Please describe your child's symptoms before submitting.");
+  if (selectedSymptoms.length === 0) {
+    showSymptomsError("Please select at least one symptom.");
+    symptomsInput.focus();
+    return;
+  }
+
+  if (selectedSymptoms.length > MAX_SYMPTOMS) {
+    showSymptomsError("Please select no more than 11 symptoms.");
     symptomsInput.focus();
     return;
   }
@@ -669,6 +702,7 @@ form.addEventListener("submit", (event) => {
 
 startOverBtn.addEventListener("click", () => {
   form.reset();
+  symptomsCount.textContent = `0 of ${MAX_SYMPTOMS} symptoms selected`;
   clearSymptomsError();
   customGenderGroup.classList.add("hidden");
   customGenderInput.required = false;
