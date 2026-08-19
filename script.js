@@ -505,67 +505,6 @@ function getDistanceBetweenCounties(fromCounty, toCounty) {
   return COUNTY_DISTANCES[key] ?? Infinity;
 }
 
-function isRandomLetterMix(word) {
-  const letters = word.replace(/[^a-z]/gi, "");
-  if (letters.length < 4) {
-    return false;
-  }
-
-  const vowels = (letters.match(/[aeiou]/gi) || []).length;
-  if (vowels === 0) {
-    return true;
-  }
-
-  if (letters.length >= 6 && vowels / letters.length < 0.15) {
-    return true;
-  }
-
-  if (/[bcdfghjklmnpqrstvwxyz]{5,}/i.test(letters)) {
-    return true;
-  }
-
-  return false;
-}
-
-function isGibberish(text) {
-  const normalized = text.trim().toLowerCase();
-  if (!normalized) {
-    return false;
-  }
-
-  const letters = normalized.replace(/[^a-z]/g, "");
-  if (letters.length === 0) {
-    return true;
-  }
-
-  const keyboardSpam = ["asdf", "qwer", "zxcv", "hjkl", "qwerty", "qazwsx"];
-  if (keyboardSpam.some((pattern) => normalized.includes(pattern))) {
-    return true;
-  }
-
-  if (/(.)\1{4,}/.test(letters)) {
-    return true;
-  }
-
-  const words = normalized.split(/\s+/).filter((word) => word.replace(/[^a-z]/g, "").length > 0);
-  const letterWords = words.map((word) => word.replace(/[^a-z]/g, ""));
-
-  if (letterWords.length > 0 && letterWords.every(isRandomLetterMix)) {
-    return true;
-  }
-
-  if (letterWords.length >= 3 && new Set(letterWords).size === 1 && isRandomLetterMix(letterWords[0])) {
-    return true;
-  }
-
-  return false;
-}
-
-function isAcceptableSymptoms(text) {
-  const trimmed = text.trim();
-  return trimmed.length > 0 && !isGibberish(trimmed);
-}
-
 function matchCondition(symptomsText) {
   const text = symptomsText.toLowerCase();
   let bestMatch = null;
@@ -691,14 +630,6 @@ form.addEventListener("submit", (event) => {
 
   if (!symptoms) {
     showSymptomsError("Please describe your child's symptoms before submitting.");
-    symptomsInput.focus();
-    return;
-  }
-
-  if (!isAcceptableSymptoms(symptoms)) {
-    showSymptomsError(
-      "Please enter real symptoms in plain language. Random letter mixtures (for example: 'asdfgh' or 'jklmnp') cannot be processed."
-    );
     symptomsInput.focus();
     return;
   }
