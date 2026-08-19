@@ -20,6 +20,20 @@ header {
   margin: 0 -1rem 1.5rem;
 }
 
+.home-link {
+  display: inline-block;
+  color: #fff;
+  opacity: 0.9;
+  font-size: 0.85rem;
+  text-decoration: none;
+  margin-bottom: 0.5rem;
+}
+
+.home-link:hover {
+  opacity: 1;
+  text-decoration: underline;
+}
+
 header h1 {
   margin: 0 0 0.5rem;
   font-size: 1.4rem;
