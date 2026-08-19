@@ -9,8 +9,6 @@ const symptomsError = document.getElementById("symptoms-error");
 
 const MIN_KEYWORD_MATCHES = 1;
 const MAX_RESOURCE_DISTANCE_KM = 35;
-const MIN_SYMPTOM_WORDS = 2;
-const MIN_SYMPTOM_CHARS = 8;
 
 // Approximate road distances (km) between county centres for nearby pairs.
 const COUNTY_DISTANCES = {
@@ -507,25 +505,41 @@ function getDistanceBetweenCounties(fromCounty, toCounty) {
   return COUNTY_DISTANCES[key] ?? Infinity;
 }
 
-function isGibberish(text) {
-  const normalized = text.trim().toLowerCase();
-  const words = normalized.split(/\s+/).filter((word) => word.length > 0);
+function isRandomLetterMix(word) {
+  const letters = word.replace(/[^a-z]/gi, "");
+  if (letters.length < 4) {
+    return false;
+  }
 
-  if (normalized.length < MIN_SYMPTOM_CHARS) {
+  const vowels = (letters.match(/[aeiou]/gi) || []).length;
+  if (vowels === 0) {
     return true;
   }
 
-  if (words.length < MIN_SYMPTOM_WORDS) {
+  if (letters.length >= 6 && vowels / letters.length < 0.15) {
     return true;
+  }
+
+  if (/[bcdfghjklmnpqrstvwxyz]{5,}/i.test(letters)) {
+    return true;
+  }
+
+  return false;
+}
+
+function isGibberish(text) {
+  const normalized = text.trim().toLowerCase();
+  if (!normalized) {
+    return false;
   }
 
   const letters = normalized.replace(/[^a-z]/g, "");
-  if (letters.length < MIN_SYMPTOM_CHARS - 2) {
+  if (letters.length === 0) {
     return true;
   }
 
-  const vowels = (letters.match(/[aeiou]/g) || []).length;
-  if (letters.length > 5 && vowels / letters.length < 0.12) {
+  const keyboardSpam = ["asdf", "qwer", "zxcv", "hjkl", "qwerty", "qazwsx"];
+  if (keyboardSpam.some((pattern) => normalized.includes(pattern))) {
     return true;
   }
 
@@ -533,19 +547,21 @@ function isGibberish(text) {
     return true;
   }
 
-  if (words.length >= 3 && new Set(words).size === 1) {
+  const words = normalized.split(/\s+/).filter((word) => word.replace(/[^a-z]/g, "").length > 0);
+  const letterWords = words.map((word) => word.replace(/[^a-z]/g, ""));
+
+  if (letterWords.length > 0 && letterWords.every(isRandomLetterMix)) {
     return true;
   }
 
-  const keyboardSpam = ["asdf", "qwer", "zxcv", "hjkl"];
-  if (keyboardSpam.some((pattern) => normalized.includes(pattern))) {
+  if (letterWords.length >= 3 && new Set(letterWords).size === 1 && isRandomLetterMix(letterWords[0])) {
     return true;
   }
 
   return false;
 }
 
-function isReadableSymptoms(text) {
+function isAcceptableSymptoms(text) {
   const trimmed = text.trim();
   return trimmed.length > 0 && !isGibberish(trimmed);
 }
@@ -679,10 +695,9 @@ form.addEventListener("submit", (event) => {
     return;
   }
 
-  if (!isReadableSymptoms(symptoms)) {
+  if (!isAcceptableSymptoms(symptoms)) {
     showSymptomsError(
-      "We could not read your symptoms clearly. Please re-type them in plain language with at least a few words " +
-      "(for example: 'my child is very hyperactive and cannot sit still in class' or 'she avoids eye contact and repeats words')."
+      "Please enter real symptoms in plain language. Random letter mixtures (for example: 'asdfgh' or 'jklmnp') cannot be processed."
     );
     symptomsInput.focus();
     return;
