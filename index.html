@@ -28,8 +28,9 @@
       <section class="tool-section">
         <h2>The Tool</h2>
         <p class="tool-intro">
-          Enter your child's symptoms, age, gender, and county to receive a <em>probable</em>
-          condition (not a medical diagnosis) and a list of nearby hospitals, clinics, and programs.
+          Select the symptoms your child shows, then enter their age, gender, and county to receive a
+          <em>probable</em> condition (not a medical diagnosis) and a list of nearby hospitals, clinics,
+          and programs.
         </p>
 
         <form id="screening-form" novalidate>
@@ -39,6 +40,7 @@
               id="symptoms"
               name="symptoms"
               multiple
+              size="8"
               required
               aria-describedby="symptoms-hint symptoms-error"
             >
@@ -56,9 +58,11 @@
               <option value="life skills">Difficulty with everyday life skills</option>
               <option value="coordination">Poor coordination or clumsiness</option>
               <option value="balance">Difficulty with balance</option>
+              <option value="communication">Speech or communication delays</option>
+              <option value="sleep">Sleep problems or poor sleep</option>
             </select>
             <p id="symptoms-hint" class="field-hint">
-              Select all symptoms that apply. You can select up to 11 symptoms.
+              Select all symptoms that apply. You can choose up to 11 of the 16 listed symptoms.
             </p>
             <p id="symptoms-count" class="field-hint">0 of 11 symptoms selected</p>
             <p id="symptoms-error" class="field-error hidden" role="alert"></p>
