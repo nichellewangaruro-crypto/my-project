@@ -24,3 +24,13 @@ Day:	6
 Prompt:	["My prototype does [it's a referral website where parent with young children in kenya who believe theyre child might have an NDD]. I already have [a static feature and boxes to input the child's age, gender, symptoms and county of residence]. I want to add [input elements that lead to a page where a probable condition is given and a list of hospitals, clinic and programs are presented according to the county]. What is the minimum change needed?"]
 Decision: Accepted 
 Reason:	[I understand the code well and it has no errors]
+
+# AI Interaction Log
+
+## Day 7
+
+Day:7
+Path taken:	Stabilise
+Prompt:	[please explain all the code in both index.html and script. js in plain language and after that if the symptoms arent clear enough, instead of Further Assesment recommended.....make an error message and ask the parent or guardian to re-type the symptoms-also when entering the symptoms.....limit it to only letters . Also for the Resources in your county-specify the program, clinic or hospital that is nearby and available and affordable in the county and relates to the Probable condition and do not generalize (add the cost as well). Lastly, for the probable condition, limit it only to: ASD, ADHD, Specific Learning disorders, e.g, dyslexia, Dysgraphia and dyscalculia, intellectual disabilities and motor disorders. Explain advice for each separate probable condition in detail as well as provide programs suitable for the child that support that specific condition in that specific county]
+Decision:	Modified
+Reason:	[I restricted the resources to areas only within the county or less than 35 kilometres]
