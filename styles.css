@@ -75,6 +75,15 @@ textarea {
   font-family: inherit;
 }
 
+select[multiple] {
+  min-height: 11rem;
+  background: #fff;
+}
+
+select[multiple] option {
+  padding: 0.35rem;
+}
+
 button {
   background: #2d6a4f;
   color: #fff;
