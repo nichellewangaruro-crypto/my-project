@@ -5,19 +5,20 @@
 }
 
 body {
-  font-family: system-ui, -apple-system, sans-serif;
+  font-family: "Trebuchet MS", "Segoe UI", sans-serif;
   line-height: 1.6;
-  color: #1a1a2e;
-  background: #f5f7fa;
+  color: #24352b;
+  background: #f7ead8;
   margin: 0;
   padding: 0 1rem 2rem;
 }
 
 header {
-  background: #2d6a4f;
+  background: linear-gradient(135deg, #d96635 0%, #ed9250 58%, #f5bd68 100%);
   color: #fff;
   padding: 1.5rem;
   margin: 0 -1rem 1.5rem;
+  box-shadow: 0 8px 24px rgba(117, 61, 34, 0.16);
 }
 
 .home-link {
@@ -51,16 +52,17 @@ main {
 }
 
 section {
-  background: #fff;
+  background: #fffaf2;
   border-radius: 8px;
   padding: 1.25rem 1.5rem;
   margin-bottom: 1.25rem;
-  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.08);
+  border-top: 4px solid #e47b3c;
+  box-shadow: 0 5px 18px rgba(67, 72, 46, 0.1);
 }
 
 h2 {
   margin-top: 0;
-  color: #2d6a4f;
+  color: #1f513c;
 }
 
 .tool-intro {
@@ -91,7 +93,7 @@ textarea {
 
 select[multiple] {
   min-height: 11rem;
-  background: #fff;
+  background: #fffdf8;
 }
 
 select[multiple] option {
@@ -99,7 +101,7 @@ select[multiple] option {
 }
 
 button {
-  background: #2d6a4f;
+  background: #1f513c;
   color: #fff;
   border: none;
   padding: 0.65rem 1.25rem;
@@ -109,7 +111,7 @@ button {
 }
 
 button:hover {
-  background: #1b4332;
+  background: #143a2b;
 }
 
 .hidden {
@@ -125,7 +127,9 @@ button:hover {
 }
 
 .result-card {
-  background: #f8f9fa;
+  background: #f6eadb;
+  border: 1px solid #e7c8a8;
+  border-left: 4px solid #e47b3c;
   border-radius: 6px;
   padding: 1rem 1.25rem;
   margin-bottom: 1rem;
@@ -134,13 +138,13 @@ button:hover {
 .result-card h3,
 .result-card h4 {
   margin-top: 0;
-  color: #2d6a4f;
+  color: #1f513c;
 }
 
 .condition-name {
   font-size: 1.15rem;
   font-weight: 700;
-  color: #1b4332;
+  color: #c65c2f;
 }
 
 .condition-detail {
@@ -180,7 +184,7 @@ textarea[aria-invalid="true"] {
 }
 
 .facility-cost {
-  color: #1b4332;
+  color: #1f513c;
   font-size: 0.9rem;
 }
 
@@ -204,9 +208,9 @@ textarea[aria-invalid="true"] {
 }
 
 #start-over {
-  background: #6c757d;
+  background: #c65c2f;
 }
 
 #start-over:hover {
-  background: #495057;
+  background: #a94724;
 }
