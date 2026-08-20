@@ -34,3 +34,11 @@ Path taken:	Stabilise
 Prompt:	[please explain all the code in both index.html and script. js in plain language and after that if the symptoms arent clear enough, instead of Further Assesment recommended.....make an error message and ask the parent or guardian to re-type the symptoms-also when entering the symptoms.....limit it to only letters . Also for the Resources in your county-specify the program, clinic or hospital that is nearby and available and affordable in the county and relates to the Probable condition and do not generalize (add the cost as well). Lastly, for the probable condition, limit it only to: ASD, ADHD, Specific Learning disorders, e.g, dyslexia, Dysgraphia and dyscalculia, intellectual disabilities and motor disorders. Explain advice for each separate probable condition in detail as well as provide programs suitable for the child that support that specific condition in that specific county]
 Decision:	Modified
 Reason:	[I restricted the resources to areas only within the county or less than 35 kilometres]
+
+# AI Interaction Log
+
+## Day 8
+Tool: GitHub Copilot and VS Code
+Prompt:	["Create a simple readme template to include; name of the project and short overview, problem statement, solution statement, tools used, known limitations and data privacy note"]
+Decision:	Modified
+Reason:	[It did not include VS Code as a tool so I added it into the README ]
