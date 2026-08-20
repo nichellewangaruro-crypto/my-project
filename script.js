@@ -5,6 +5,7 @@ const customGenderGroup = document.getElementById("custom-gender-group");
 const customGenderInput = document.getElementById("custom-gender");
 const startOverBtn = document.getElementById("start-over");
 
+const symptomsInputs = document.getElementById("symptoms");
 const symptomsInput = document.getElementById("symptoms");
 const symptomsCount = document.getElementById("symptoms-count");
 const symptomsError = document.getElementById("symptoms-error");
