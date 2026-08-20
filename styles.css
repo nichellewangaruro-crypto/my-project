@@ -194,6 +194,20 @@ textarea[aria-invalid="true"] {
   font-style: italic;
 }
 
+.facility-links {
+  display: inline-block;
+  margin-top: 0.25rem;
+}
+
+.facility-links a {
+  color: #c65c2f;
+  font-weight: 600;
+}
+
+.facility-links a:hover {
+  color: #1f513c;
+}
+
 #facility-list {
   padding-left: 1.25rem;
 }

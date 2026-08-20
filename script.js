@@ -533,6 +533,38 @@ function getDistanceBetweenCounties(fromCounty, toCounty) {
   return COUNTY_DISTANCES[key] ?? Infinity;
 }
 
+function getCountyHops(startCounty, maxHops) {
+  const hops = new Map([[startCounty, 0]]);
+  const queue = [startCounty];
+
+  while (queue.length > 0) {
+    const currentCounty = queue.shift();
+    const currentHops = hops.get(currentCounty);
+
+    if (currentHops >= maxHops) {
+      continue;
+    }
+
+    for (const distanceKey of Object.keys(COUNTY_DISTANCES)) {
+      const [firstCounty, secondCounty] = distanceKey.split("|");
+      let nextCounty = null;
+
+      if (firstCounty === currentCounty) {
+        nextCounty = secondCounty;
+      } else if (secondCounty === currentCounty) {
+        nextCounty = firstCounty;
+      }
+
+      if (nextCounty && !hops.has(nextCounty)) {
+        hops.set(nextCounty, currentHops + 1);
+        queue.push(nextCounty);
+      }
+    }
+  }
+
+  return hops;
+}
+
 function matchCondition(symptomsText) {
   const text = symptomsText.toLowerCase();
   let bestMatch = null;
@@ -569,6 +601,7 @@ function matchCondition(symptomsText) {
 function getResourcesForCountyAndCondition(county, conditionId) {
   const seen = new Set();
   const allResources = [];
+  const countyHops = getCountyHops(county, 2);
 
   for (const hubResources of Object.values(resourcesByHub)) {
     for (const resource of hubResources[conditionId] || []) {
@@ -579,19 +612,32 @@ function getResourcesForCountyAndCondition(county, conditionId) {
     }
   }
 
-  return allResources
+  const locatedResources = allResources
     .map((resource) => {
       const distanceKm = getDistanceBetweenCounties(county, resource.locationCounty);
-      return { ...resource, distanceKm };
-    })
+      const hops = countyHops.get(resource.locationCounty) ?? Infinity;
+      return { ...resource, distanceKm, hops };
+    });
+
+  const nearbyResources = locatedResources
     .filter((resource) => resource.distanceKm <= MAX_RESOURCE_DISTANCE_KM)
-    .sort((a, b) => a.distanceKm - b.distanceKm)
-    .map((resource) => ({
-      ...resource,
-      travelNote: resource.distanceKm === 0
-        ? `Located in ${county} (within your county).`
-        : `Located in ${resource.locationCounty}, approximately ${resource.distanceKm} km from ${county} (within 35 km).`
-    }));
+    .sort((a, b) => a.distanceKm - b.distanceKm);
+
+  const selectedResources = nearbyResources.length > 0
+    ? nearbyResources
+    : locatedResources
+      .filter((resource) => resource.hops > 0 && resource.hops <= 2)
+      .sort((a, b) => a.hops - b.hops || a.distanceKm - b.distanceKm);
+
+  return selectedResources.map((resource) => ({
+    ...resource,
+    travelNote: resource.distanceKm === 0
+      ? `Located in ${county} (within your county).`
+      : resource.hops <= 2 && resource.distanceKm > MAX_RESOURCE_DISTANCE_KM
+        ? `Located in ${resource.locationCounty}, approximately ${resource.distanceKm} km from ${county}; nearest available referral within two connected counties.`
+        : `Located in ${resource.locationCounty}, approximately ${resource.distanceKm} km from ${county}.`,
+    mapUrl: `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(`${resource.name}, ${resource.locationCounty}, Kenya`)}`
+  }));
 }
 
 function renderAdvice(adviceItems) {
@@ -608,12 +654,17 @@ function renderFacilities(county, conditionId) {
   const list = document.getElementById("facility-list");
   const heading = document.getElementById("resources-heading");
   const items = getResourcesForCountyAndCondition(county, conditionId);
+  const usedFallback = items.some(
+    (item) => item.distanceKm > MAX_RESOURCE_DISTANCE_KM
+  );
 
-  heading.textContent = `Resources for This Condition Near ${county} County`;
+  heading.textContent = usedFallback
+    ? `Nearest Resources for This Condition Near ${county} County`
+    : `Resources for This Condition Near ${county} County`;
   list.innerHTML = "";
 
   if (items.length === 0) {
-    list.innerHTML = `<li>No hospitals, clinics, or programmes for this condition were found within 35 km of ${county} County. Please contact your county health office for a local referral.</li>`;
+    list.innerHTML = `<li>No hospitals, clinics, or programmes for this condition were found in ${county} County or the next two connected counties. Please contact your county health office for a local referral.</li>`;
     return;
   }
 
@@ -624,7 +675,10 @@ function renderFacilities(county, conditionId) {
       <span class="facility-type">(${facility.type})</span><br>
       ${facility.program}<br>
       <span class="facility-cost"><strong>Estimated cost:</strong> ${facility.cost}</span><br>
-      <span class="facility-travel">${facility.travelNote}</span>
+      <span class="facility-travel">${facility.travelNote}</span><br>
+      <span class="facility-links">
+        <a href="${facility.mapUrl}" target="_blank" rel="noopener noreferrer">View map and resource details</a>
+      </span>
     `;
     list.appendChild(li);
   }
