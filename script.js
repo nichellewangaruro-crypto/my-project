@@ -565,6 +565,58 @@ function getCountyHops(startCounty, maxHops) {
   return hops;
 }
 
+function getShortestCountyDistances(startCounty) {
+  const distances = new Map([[startCounty, 0]]);
+  const unvisited = new Set([startCounty]);
+
+  for (const distanceKey of Object.keys(COUNTY_DISTANCES)) {
+    const [firstCounty, secondCounty] = distanceKey.split("|");
+    unvisited.add(firstCounty);
+    unvisited.add(secondCounty);
+  }
+
+  while (unvisited.size > 0) {
+    let currentCounty = null;
+    let currentDistance = Infinity;
+
+    for (const county of unvisited) {
+      const distance = distances.get(county) ?? Infinity;
+      if (distance < currentDistance) {
+        currentCounty = county;
+        currentDistance = distance;
+      }
+    }
+
+    if (!currentCounty) {
+      break;
+    }
+
+    unvisited.delete(currentCounty);
+
+    for (const distanceKey of Object.keys(COUNTY_DISTANCES)) {
+      const [firstCounty, secondCounty] = distanceKey.split("|");
+      let nextCounty = null;
+
+      if (firstCounty === currentCounty) {
+        nextCounty = secondCounty;
+      } else if (secondCounty === currentCounty) {
+        nextCounty = firstCounty;
+      }
+
+      if (!nextCounty || !unvisited.has(nextCounty)) {
+        continue;
+      }
+
+      const routeDistance = currentDistance + COUNTY_DISTANCES[distanceKey];
+      if (routeDistance < (distances.get(nextCounty) ?? Infinity)) {
+        distances.set(nextCounty, routeDistance);
+      }
+    }
+  }
+
+  return distances;
+}
+
 function matchCondition(symptomsText) {
   const text = symptomsText.toLowerCase();
   let bestMatch = null;
@@ -602,6 +654,7 @@ function getResourcesForCountyAndCondition(county, conditionId) {
   const seen = new Set();
   const allResources = [];
   const countyHops = getCountyHops(county, 2);
+  const countyDistances = getShortestCountyDistances(county);
 
   for (const hubResources of Object.values(resourcesByHub)) {
     for (const resource of hubResources[conditionId] || []) {
@@ -616,7 +669,8 @@ function getResourcesForCountyAndCondition(county, conditionId) {
     .map((resource) => {
       const distanceKm = getDistanceBetweenCounties(county, resource.locationCounty);
       const hops = countyHops.get(resource.locationCounty) ?? Infinity;
-      return { ...resource, distanceKm, hops };
+      const routeDistanceKm = countyDistances.get(resource.locationCounty) ?? Infinity;
+      return { ...resource, distanceKm, hops, routeDistanceKm };
     });
 
   const nearbyResources = locatedResources
@@ -629,13 +683,21 @@ function getResourcesForCountyAndCondition(county, conditionId) {
       .filter((resource) => resource.hops > 0 && resource.hops <= 2)
       .sort((a, b) => a.hops - b.hops || a.distanceKm - b.distanceKm);
 
-  return selectedResources.map((resource) => ({
+  const fallbackResources = selectedResources.length > 0
+    ? selectedResources
+    : locatedResources
+      .sort((a, b) => a.routeDistanceKm - b.routeDistanceKm)
+      .slice(0, 1);
+
+  return fallbackResources.map((resource) => ({
     ...resource,
     travelNote: resource.distanceKm === 0
       ? `Located in ${county} (within your county).`
       : resource.hops <= 2 && resource.distanceKm > MAX_RESOURCE_DISTANCE_KM
         ? `Located in ${resource.locationCounty}, approximately ${resource.distanceKm} km from ${county}; nearest available referral within two connected counties.`
-        : `Located in ${resource.locationCounty}, approximately ${resource.distanceKm} km from ${county}.`,
+        : resource.routeDistanceKm < Infinity
+          ? `Located in ${resource.locationCounty}, approximately ${resource.routeDistanceKm} km by the nearest county route from ${county}; closest available referral for this condition.`
+          : `Located in ${resource.locationCounty}; closest available referral for this condition.`,
     mapUrl: `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(`${resource.name}, ${resource.locationCounty}, Kenya`)}`
   }));
 }
