@@ -488,6 +488,69 @@ const resourcesByHub = {
   }
 };
 
+const profileResources = [
+  {
+    conditionIds: ["adhd"],
+    name: "ADDitude — ADHD in Girls and Teens",
+    type: "online resource",
+    program: "Guides for recognising ADHD presentations in girls and supporting children and teenagers at home and school",
+    cost: "Free online information",
+    ageMin: 3,
+    ageMax: 16,
+    genders: ["female"],
+    online: true,
+    url: "https://www.additudemag.com/adhd-in-girls-women/"
+  },
+  {
+    conditionIds: ["adhd"],
+    name: "Child Mind Institute — ADHD Resource Library",
+    type: "online resource",
+    program: "Parent-friendly ADHD information and practical strategies for children and adolescents",
+    cost: "Free online information",
+    ageMin: 3,
+    ageMax: 16,
+    genders: ["any"],
+    online: true,
+    url: "https://childmind.org/topics/concerns/adhd/"
+  },
+  {
+    conditionIds: ["asd"],
+    name: "Autism Speaks — Autism Tool Kits",
+    type: "online resource",
+    program: "Downloadable guides for families covering communication, school support, daily living, and transitions",
+    cost: "Free online information",
+    ageMin: 3,
+    ageMax: 16,
+    genders: ["any"],
+    online: true,
+    url: "https://www.autismspeaks.org/tool-kit"
+  },
+  {
+    conditionIds: ["dyslexia", "dysgraphia", "dyscalculia"],
+    name: "Understood — Learning and Thinking Differences",
+    type: "online resource",
+    program: "Practical information and school-support ideas for children with learning and attention differences",
+    cost: "Free online information",
+    ageMin: 3,
+    ageMax: 16,
+    genders: ["any"],
+    online: true,
+    url: "https://www.understood.org/en/articles/learning-and-thinking-differences"
+  },
+  {
+    conditionIds: ["intellectual", "motor"],
+    name: "CDC — Child Development Resources",
+    type: "online resource",
+    program: "Developmental milestone information and guidance for discussing concerns with a healthcare provider",
+    cost: "Free online information",
+    ageMin: 3,
+    ageMax: 16,
+    genders: ["any"],
+    online: true,
+    url: "https://www.cdc.gov/ncbddd/actearly/milestones/index.html"
+  }
+];
+
 function showSymptomsError(message) {
   symptomsError.textContent = message;
   symptomsError.classList.remove("hidden");
@@ -645,7 +708,15 @@ function matchCondition(symptomsText) {
   return bestMatch;
 }
 
-function getResourcesForCountyAndCondition(county, conditionId) {
+function resourceMatchesProfile(resource, age, gender) {
+  const ageMatches = resource.ageMin === undefined ||
+    (age >= resource.ageMin && age <= resource.ageMax);
+  const genderMatches = !resource.genders ||
+    resource.genders.includes("any") || resource.genders.includes(gender);
+  return ageMatches && genderMatches;
+}
+
+function getResourcesForCountyAndCondition(county, conditionId, age, gender) {
   const seen = new Set();
   const allResources = [];
   const countyHops = getCountyHops(county, 2);
@@ -660,23 +731,39 @@ function getResourcesForCountyAndCondition(county, conditionId) {
     }
   }
 
+  for (const resource of profileResources) {
+    if (resource.conditionIds.includes(conditionId) && resourceMatchesProfile(resource, age, gender)) {
+      if (!seen.has(resource.name)) {
+        seen.add(resource.name);
+        allResources.push(resource);
+      }
+    }
+  }
+
   const locatedResources = allResources
     .map((resource) => {
-      const distanceKm = getDistanceBetweenCounties(county, resource.locationCounty);
-      const hops = countyHops.get(resource.locationCounty) ?? Infinity;
-      const routeDistanceKm = countyDistances.get(resource.locationCounty) ?? Infinity;
-      return { ...resource, distanceKm, hops, routeDistanceKm };
+      const distanceKm = resource.online
+        ? Infinity
+        : getDistanceBetweenCounties(county, resource.locationCounty);
+      const hops = resource.online
+        ? Infinity
+        : countyHops.get(resource.locationCounty) ?? Infinity;
+      const routeDistanceKm = resource.online
+        ? Infinity
+        : countyDistances.get(resource.locationCounty) ?? Infinity;
+      const profileRelevance = resource.online ? 2 : 0;
+      return { ...resource, distanceKm, hops, routeDistanceKm, profileRelevance };
     });
 
   const nearbyResources = locatedResources
-    .filter((resource) => resource.distanceKm <= MAX_RESOURCE_DISTANCE_KM)
-    .sort((a, b) => a.distanceKm - b.distanceKm);
+    .filter((resource) => resource.distanceKm <= MAX_RESOURCE_DISTANCE_KM || resource.online)
+    .sort((a, b) => b.profileRelevance - a.profileRelevance || a.distanceKm - b.distanceKm);
 
   const selectedResources = nearbyResources.length > 0
     ? nearbyResources
     : locatedResources
-      .filter((resource) => resource.hops > 0 && resource.hops <= 2)
-      .sort((a, b) => a.hops - b.hops || a.distanceKm - b.distanceKm);
+      .filter((resource) => resource.online || (resource.hops > 0 && resource.hops <= 2))
+      .sort((a, b) => b.profileRelevance - a.profileRelevance || a.hops - b.hops || a.distanceKm - b.distanceKm);
 
   const fallbackResources = selectedResources.length > 0
     ? selectedResources
@@ -686,14 +773,16 @@ function getResourcesForCountyAndCondition(county, conditionId) {
 
   return fallbackResources.map((resource) => ({
     ...resource,
-    travelNote: resource.distanceKm === 0
+    travelNote: resource.online
+      ? "Available online from anywhere in Kenya."
+      : resource.distanceKm === 0
       ? `Located in ${county} (within your county).`
       : resource.hops <= 2 && resource.distanceKm > MAX_RESOURCE_DISTANCE_KM
         ? `Located in ${resource.locationCounty}, approximately ${resource.distanceKm} km from ${county}; nearest available referral within two connected counties.`
         : resource.routeDistanceKm < Infinity
           ? `Located in ${resource.locationCounty}, approximately ${resource.routeDistanceKm} km by the nearest county route from ${county}; closest available referral for this condition.`
           : `Located in ${resource.locationCounty}; closest available referral for this condition.`,
-    mapUrl: `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(`${resource.name}, ${resource.locationCounty}, Kenya`)}`
+    mapUrl: resource.url || `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(`${resource.name}, ${resource.locationCounty}, Kenya`)}`
   }));
 }
 
@@ -707,17 +796,17 @@ function renderAdvice(adviceItems) {
   }
 }
 
-function renderFacilities(county, conditionId) {
+function renderFacilities(county, conditionId, age, gender) {
   const list = document.getElementById("facility-list");
   const heading = document.getElementById("resources-heading");
-  const items = getResourcesForCountyAndCondition(county, conditionId);
+  const items = getResourcesForCountyAndCondition(county, conditionId, age, gender);
   const usedFallback = items.some(
     (item) => item.distanceKm > MAX_RESOURCE_DISTANCE_KM
   );
 
   heading.textContent = usedFallback
-    ? `Nearest Resources for This Condition Near ${county} County`
-    : `Resources for This Condition Near ${county} County`;
+    ? `Nearest Resources for This Condition for Age ${age} Near ${county} County`
+    : `Resources for This Condition for Age ${age} Near ${county} County`;
   list.innerHTML = "";
 
   if (items.length === 0) {
@@ -734,7 +823,7 @@ function renderFacilities(county, conditionId) {
       <span class="facility-cost"><strong>Estimated cost:</strong> ${facility.cost}</span><br>
       <span class="facility-travel">${facility.travelNote}</span><br>
       <span class="facility-links">
-        <a href="${facility.mapUrl}" target="_blank" rel="noopener noreferrer">View map and resource details</a>
+        <a href="${facility.mapUrl}" target="_blank" rel="noopener noreferrer">${facility.online ? "Open online resource" : "View map and resource details"}</a>
       </span>
     `;
     list.appendChild(li);
@@ -766,6 +855,7 @@ form.addEventListener("submit", (event) => {
   const selectedSymptoms = getSelectedSymptoms();
   const symptoms = selectedSymptoms.join(", ");
   const age = Number(formData.get("age"));
+  const gender = getGenderValue();
   const county = formData.get("county");
 
   if (selectedSymptoms.length === 0) {
@@ -806,7 +896,7 @@ form.addEventListener("submit", (event) => {
   document.getElementById("condition-result").textContent = result.name;
   document.getElementById("condition-explanation").textContent = result.explanation;
   renderAdvice(result.advice);
-  renderFacilities(county, result.id);
+  renderFacilities(county, result.id, age, gender);
 
   form.closest(".tool-section").classList.add("hidden");
   resultsSection.classList.remove("hidden");
