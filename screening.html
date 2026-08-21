@@ -36,32 +36,29 @@
 
         <form id="screening-form" novalidate>
           <div class="form-group">
-            <label for="symptoms">What symptoms does your child display?</label>
-            <select
+            <fieldset
               id="symptoms"
-              name="symptoms"
-              multiple
-              size="8"
-              required
+              class="symptom-checklist"
               aria-describedby="symptoms-hint symptoms-error"
             >
-              <option value="attention">Difficulty paying attention</option>
-              <option value="hyperactive">Hyperactivity or cannot sit still</option>
-              <option value="impulsive">Impulsive behaviour</option>
-              <option value="social">Difficulty making friends or eye contact</option>
-              <option value="repetitive">Repetitive behaviours or strong need for routine</option>
-              <option value="sensory">Sensory sensitivity or frequent meltdowns</option>
-              <option value="reading">Difficulty reading or sounding out words</option>
-              <option value="spelling">Spelling difficulties</option>
-              <option value="writing">Messy or slow handwriting</option>
-              <option value="numbers">Difficulty with numbers or counting</option>
-              <option value="milestones">Delayed developmental milestones</option>
-              <option value="life skills">Difficulty with everyday life skills</option>
-              <option value="coordination">Poor coordination or clumsiness</option>
-              <option value="balance">Difficulty with balance</option>
-              <option value="communication">Speech or communication delays</option>
-              <option value="sleep">Sleep problems or poor sleep</option>
-            </select>
+              <legend>What symptoms does your child display?</legend>
+              <label class="symptom-option"><input type="checkbox" name="symptoms" value="attention">Difficulty paying attention</label>
+              <label class="symptom-option"><input type="checkbox" name="symptoms" value="hyperactive">Hyperactivity or cannot sit still</label>
+              <label class="symptom-option"><input type="checkbox" name="symptoms" value="impulsive">Impulsive behaviour</label>
+              <label class="symptom-option"><input type="checkbox" name="symptoms" value="social">Difficulty making friends or eye contact</label>
+              <label class="symptom-option"><input type="checkbox" name="symptoms" value="repetitive">Repetitive behaviours or strong need for routine</label>
+              <label class="symptom-option"><input type="checkbox" name="symptoms" value="sensory">Sensory sensitivity or frequent meltdowns</label>
+              <label class="symptom-option"><input type="checkbox" name="symptoms" value="reading">Difficulty reading or sounding out words</label>
+              <label class="symptom-option"><input type="checkbox" name="symptoms" value="spelling">Spelling difficulties</label>
+              <label class="symptom-option"><input type="checkbox" name="symptoms" value="writing">Messy or slow handwriting</label>
+              <label class="symptom-option"><input type="checkbox" name="symptoms" value="numbers">Difficulty with numbers or counting</label>
+              <label class="symptom-option"><input type="checkbox" name="symptoms" value="milestones">Delayed developmental milestones</label>
+              <label class="symptom-option"><input type="checkbox" name="symptoms" value="life skills">Difficulty with everyday life skills</label>
+              <label class="symptom-option"><input type="checkbox" name="symptoms" value="coordination">Poor coordination or clumsiness</label>
+              <label class="symptom-option"><input type="checkbox" name="symptoms" value="balance">Difficulty with balance</label>
+              <label class="symptom-option"><input type="checkbox" name="symptoms" value="communication">Speech or communication delays</label>
+              <label class="symptom-option"><input type="checkbox" name="symptoms" value="sleep">Sleep problems or poor sleep</label>
+            </fieldset>
             <p id="symptoms-hint" class="field-hint">
               Select all symptoms that apply. You can choose up to 11 of the 16 listed symptoms.
             </p>

@@ -501,20 +501,16 @@ function clearSymptomsError() {
 }
 
 function getSelectedSymptoms() {
-  return Array.from(symptomsInput.selectedOptions).map(
-    (option) => option.value
-  );
+  return Array.from(
+    symptomsInput.querySelectorAll('input[name="symptoms"]:checked')
+  ).map((input) => input.value);
 }
 
-symptomsInput.addEventListener("change", () => {
+symptomsInput.addEventListener("change", (event) => {
   const selectedSymptoms = getSelectedSymptoms();
 
   if (selectedSymptoms.length > MAX_SYMPTOMS) {
-    const lastSelected = symptomsInput.selectedOptions[
-      symptomsInput.selectedOptions.length - 1
-    ];
-
-    lastSelected.selected = false;
+    event.target.checked = false;
     showSymptomsError("Please select no more than 11 symptoms.");
   } else {
     clearSymptomsError();
